@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -32,6 +31,8 @@ public class CartResource {
     private static final Logger log = LoggerFactory.getLogger(CartResource.class);
 
     // TODO: Add annotation of orders messaging configuration here
+
+
     @ConfigProperty(name = "mp.messaging.outgoing.orders.bootstrap.servers")
     public String bootstrapServers;
 
@@ -46,54 +47,53 @@ public class CartResource {
 
     private Producer<String, String> producer;
 
+
+
+
     @Inject
     ShoppingCartService shoppingCartService;
 
     // TODO ADD getCart method
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("{cartId}")
-    public ShoppingCart getCart(@PathParam("cartId") String cartId) {
+    public ShoppingCart getCart(String cartId) {
         return shoppingCartService.getShoppingCart(cartId);
     }
 
-     @POST
+
+
+    @POST
     @Path("{cartId}/{itemId}/{quantity}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public ShoppingCart add(@PathParam("cartId") String cartId,
-                            @PathParam("itemId") String itemId,
-                            @PathParam("quantity") int quantity) throws Exception {
+    public ShoppingCart add(String cartId, String itemId, int quantity) throws Exception {
         return shoppingCartService.addItem(cartId, itemId, quantity);
     }
 
     @POST
     @Path("{cartId}/{tmpId}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public ShoppingCart set(@PathParam("cartId") String cartId,
-                            @PathParam("tmpId") String tmpId) throws Exception {
+    public ShoppingCart set(String cartId, String tmpId) throws Exception {
         return shoppingCartService.set(cartId, tmpId);
     }
 
     @DELETE
     @Path("{cartId}/{itemId}/{quantity}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public ShoppingCart delete(@PathParam("cartId") String cartId,
-                               @PathParam("itemId") String itemId,
-                               @PathParam("quantity") int quantity) throws Exception {
+    public ShoppingCart delete(String cartId, String itemId, int quantity) throws Exception {
         return shoppingCartService.deleteItem(cartId, itemId, quantity);
     }
 
+
+
     @POST
     @Path("/checkout/{cartId}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     public ShoppingCart checkout(@PathParam("cartId") String cartId, Order order) {
-        // TODO ADD for KAFKA
         sendOrder(order, cartId);
         return shoppingCartService.checkout(cartId);
     }
 
+
+
     // TODO ADD for KAFKA
+
+
     private void sendOrder(Order order, String cartId) {
         order.setTotal(shoppingCartService.getShoppingCart(cartId).getCartTotal() + "");
         ProducerRecord<String, String> producerRecord = new ProducerRecord<>(ordersTopic, null, null, null, Json.encode(order), new RecordHeaders().add("content-type", "application/json".getBytes()));
@@ -101,7 +101,10 @@ public class CartResource {
         log.info("Sent message: " + Json.encode(order));
     }
 
+
     // TODO ADD for KAFKA
+
+
     public void init(@Observes StartupEvent ev) {
         Properties props = new Properties();
 
@@ -110,5 +113,7 @@ public class CartResource {
         props.put("key.serializer", ordersTopicKeySerializer);
         producer = new KafkaProducer<String, String>(props);
     }
+
+
 
 }

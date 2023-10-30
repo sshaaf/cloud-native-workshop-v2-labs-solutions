@@ -22,7 +22,7 @@ public class KafkaOrders {
     public CompletionStage<Void> onMessage(KafkaRecord<String, String> message)
             throws IOException {
 
-        LOG.info("Kafka order message with value = {} arrived", message.getPayload());
+        LOG.info("Kafka order message with value = {} arrived via orders", message.getPayload());
 
         JsonObject payload = new JsonObject(message.getPayload());
         Order newOrder = new Order();
@@ -42,15 +42,18 @@ public class KafkaOrders {
     public CompletionStage<Void> onMessagePayments(KafkaRecord<String, String> message)
             throws IOException {
 
-        LOG.info("Kafka payment message with value = {} arrived", message.getPayload());
+        LOG.info("Kafka payment message with value = {} arrived via payments", message.getPayload());
 
         JsonObject payments = new JsonObject(message.getPayload());
 
         Order newOrder = Order.findByOrderId(payments.getString("orderId"));
-        newOrder.status = payments.getString("status");
-        newOrder.update();
+        if(newOrder != null){
+            newOrder.status = payments.getString("status");
+            newOrder.update();
+        }
 
         return message.ack();
     }
 
 }
+

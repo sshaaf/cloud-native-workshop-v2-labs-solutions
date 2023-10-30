@@ -26,6 +26,8 @@ import jakarta.inject.Singleton;
 public class PaymentResource {
 
     // TODO: Add Messaging ConfigProperty here
+
+
     @ConfigProperty(name = "mp.messaging.outgoing.payments.bootstrap.servers")
     public String bootstrapServers;
 
@@ -42,7 +44,10 @@ public class PaymentResource {
 
     public static final Logger log = LoggerFactory.getLogger(PaymentResource.class);
 
+
     // TODO: Add handleCloudEvent method here
+
+
     @POST
     public void handleCloudEvent(String cloudEventJson) {
         String orderId = "unknown";
@@ -68,7 +73,10 @@ public class PaymentResource {
         }
     }
 
+
     // TODO: Add pass method here
+
+
     private void pass(String orderId, String paymentId, String remarks) {
 
         JsonObject payload = new JsonObject();
@@ -79,8 +87,12 @@ public class PaymentResource {
         log.info("Sending payment success: " + payload.toString());
         producer.send(new ProducerRecord<String, String>(paymentsTopic, payload.toString()));
     }
-    
+
+
+
     // TODO: Add fail method here
+
+
     private void fail(String orderId, String paymentId, String remarks) {
         JsonObject payload = new JsonObject();
         payload.put("orderId", orderId);
@@ -91,17 +103,23 @@ public class PaymentResource {
         producer.send(new ProducerRecord<String, String>(paymentsTopic, payload.toString()));
     }
 
-    // TODO: Add consumer method here
-    // @Incoming("orders")
-    // public CompletionStage<Void> onMessage(KafkaRecord<String, String> message)
-    //         throws IOException {
 
-    //     log.info("Kafka message with value = {} arrived", message.getPayload());
-    //     handleCloudEvent(message.getPayload());
-    //     return message.ack();
-    // }
+    // TODO: Add consumer method here
+
+
+ /*    @Incoming("orders")
+    public CompletionStage<Void> onMessage(KafkaRecord<String, String> message)
+            throws IOException {
+
+        log.info("Kafka message with value = {} arrived", message.getPayload());
+        handleCloudEvent(message.getPayload());
+        return message.ack();
+    }
+*/
 
     // TODO: Add init method here
+
+
     public void init(@Observes StartupEvent ev) {
         Properties props = new Properties();
 
@@ -110,4 +128,6 @@ public class PaymentResource {
         props.put("key.serializer", paymentsTopicKeySerializer);
         producer = new KafkaProducer<String, String>(props);
     }
+
+
 }

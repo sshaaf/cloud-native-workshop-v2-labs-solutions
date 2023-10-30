@@ -12,10 +12,14 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.PathParam;
 
 // TODO: Add JAX-RS annotations here
+
+
+
 @Path("/api/orders")
 public class OrderResource {
 
-    // TODO: Add list(), add(), updateStatus() methods here
+
+
     @GET
     public List<Order> list() {
         return Order.listAll();
@@ -24,6 +28,7 @@ public class OrderResource {
     @POST
     public List<Order> add(Order order) {
         order.persist();
+        System.out.println(order);
         return list();
     }
 
@@ -37,5 +42,6 @@ public class OrderResource {
 
     }
 
-       
+
+
 }
